@@ -26,6 +26,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editHandle, setEditHandle] = useState(profile.handle);
   const [openaiKeyInput, setOpenaiKeyInput] = useState(profile.openaiKey);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'loading' | 'sync_success' | 'load_success' | 'error'>('idle');
+  const [syncMessage, setSyncMessage] = useState('');
 
   const stats = useMemo(() => getStats(), [getStats, missions.length]);
 
@@ -187,28 +189,74 @@ export default function ProfilePage() {
               ACCOUNT SYNC // {user.email || user.user_metadata?.user_name}
             </span>
           </div>
-          <div className="p-4 flex items-center gap-3 flex-wrap">
-            <button
-              onClick={() => user.id && saveToSupabase(user.id)}
-              className="px-4 py-2 bg-secondary/10 border border-secondary text-secondary text-xs font-bold hover:bg-secondary/20 transition-all flex items-center gap-2"
-            >
-              <CloudUpload size={14} />
-              SYNC TO CLOUD
-            </button>
-            <button
-              onClick={() => user.id && loadFromSupabase(user.id)}
-              className="px-4 py-2 bg-primary/10 border border-primary text-primary text-xs font-bold hover:bg-primary/20 transition-all flex items-center gap-2"
-            >
-              <RotateCcw size={14} />
-              LOAD FROM CLOUD
-            </button>
-            <button
-              onClick={signOut}
-              className="px-4 py-2 bg-alert/10 border border-alert text-alert text-xs font-bold hover:bg-alert/20 transition-all flex items-center gap-2"
-            >
-              <LogOut size={14} />
-              SIGN OUT
-            </button>
+          <div className="p-4 space-y-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={async () => {
+                  if (!user.id) return;
+                  setSyncStatus('syncing');
+                  setSyncMessage('> UPLINK ESTABLISHED... TRANSMITTING DATA...');
+                  try {
+                    await saveToSupabase(user.id);
+                    setSyncStatus('sync_success');
+                    setSyncMessage('> SYNC COMPLETE // DATA SECURED IN CLOUD');
+                  } catch {
+                    setSyncStatus('error');
+                    setSyncMessage('> SYNC FAILED // CONNECTION INTERRUPTED');
+                  }
+                  setTimeout(() => { setSyncStatus('idle'); setSyncMessage(''); }, 3000);
+                }}
+                disabled={syncStatus === 'syncing' || syncStatus === 'loading'}
+                className="px-4 py-2 bg-secondary/10 border border-secondary text-secondary text-xs font-bold hover:bg-secondary/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              >
+                <CloudUpload size={14} className={syncStatus === 'syncing' ? 'animate-pulse' : ''} />
+                {syncStatus === 'syncing' ? 'TRANSMITTING...' : 'SYNC TO CLOUD'}
+              </button>
+              <button
+                onClick={async () => {
+                  if (!user.id) return;
+                  setSyncStatus('loading');
+                  setSyncMessage('> ESTABLISHING DOWNLINK... RETRIEVING DATA...');
+                  try {
+                    await loadFromSupabase(user.id);
+                    setSyncStatus('load_success');
+                    setSyncMessage('> LOAD COMPLETE // CLOUD DATA INTEGRATED');
+                  } catch {
+                    setSyncStatus('error');
+                    setSyncMessage('> LOAD FAILED // CONNECTION INTERRUPTED');
+                  }
+                  setTimeout(() => { setSyncStatus('idle'); setSyncMessage(''); }, 3000);
+                }}
+                disabled={syncStatus === 'syncing' || syncStatus === 'loading'}
+                className="px-4 py-2 bg-primary/10 border border-primary text-primary text-xs font-bold hover:bg-primary/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              >
+                <RotateCcw size={14} className={syncStatus === 'loading' ? 'animate-spin' : ''} />
+                {syncStatus === 'loading' ? 'RETRIEVING...' : 'LOAD FROM CLOUD'}
+              </button>
+              <button
+                onClick={signOut}
+                disabled={syncStatus === 'syncing' || syncStatus === 'loading'}
+                className="px-4 py-2 bg-alert/10 border border-alert text-alert text-xs font-bold hover:bg-alert/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              >
+                <LogOut size={14} />
+                SIGN OUT
+              </button>
+            </div>
+            {syncMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`text-[10px] font-mono ${
+                  syncStatus === 'error'
+                    ? 'text-alert'
+                    : syncStatus === 'sync_success' || syncStatus === 'load_success'
+                    ? 'text-primary'
+                    : 'text-secondary'
+                }`}
+              >
+                {syncMessage}
+              </motion.div>
+            )}
           </div>
         </div>
       ) : (
