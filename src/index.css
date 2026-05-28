@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/* Theme variables */
+:root {
+  --theme-primary: #00ff41;
+  --theme-secondary: #00f0ff;
+  --theme-accent: #ff00ff;
+  --theme-warn: #ffaa00;
+  --theme-alert: #ff0040;
+  --theme-bg: #050505;
+  --theme-terminal: #0a0a0f;
+  --theme-panel: #111118;
+  --theme-border: #1a1a2e;
+  --theme-border-light: #2a2a3e;
+  --theme-text-dim: #6b7280;
+}
+
+[data-theme="cyber"] {
+  --theme-primary: #00f0ff;
+  --theme-secondary: #0080ff;
+  --theme-accent: #ff00ff;
+  --theme-warn: #ffaa00;
+  --theme-alert: #ff4444;
+  --theme-bg: #050a14;
+  --theme-terminal: #0a1525;
+  --theme-panel: #0f1d33;
+  --theme-border: #1a3050;
+  --theme-border-light: #2a5080;
+  --theme-text-dim: #6b8cae;
+}
+
+[data-theme="alert"] {
+  --theme-primary: #ff0040;
+  --theme-secondary: #ff4400;
+  --theme-accent: #ffaa00;
+  --theme-warn: #ffcc00;
+  --theme-alert: #ff0000;
+  --theme-bg: #140505;
+  --theme-terminal: #1f0a0a;
+  --theme-panel: #2a1111;
+  --theme-border: #3e1a1a;
+  --theme-border-light: #5e2a2a;
+  --theme-text-dim: #ae6b6b;
+}
+
+[data-theme="ghost"] {
+  --theme-primary: #e0e0e0;
+  --theme-secondary: #a0a0a0;
+  --theme-accent: #ffffff;
+  --theme-warn: #ffaa00;
+  --theme-alert: #ff4444;
+  --theme-bg: #0a0a0a;
+  --theme-terminal: #111111;
+  --theme-panel: #1a1a1a;
+  --theme-border: #2a2a2a;
+  --theme-border-light: #3a3a3a;
+  --theme-text-dim: #888888;
+}
+
+@theme {
+  --color-primary: var(--theme-primary);
+  --color-secondary: var(--theme-secondary);
+  --color-accent: var(--theme-accent);
+  --color-warn: var(--theme-warn);
+  --color-alert: var(--theme-alert);
+  --color-dark: var(--theme-bg);
+  --color-terminal: var(--theme-terminal);
+  --color-panel: var(--theme-panel);
+  --color-border: var(--theme-border);
+  --color-border-light: var(--theme-border-light);
+  --color-text-dim: var(--theme-text-dim);
+  --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+}
+
+:root {
+  font-family: 'JetBrains Mono', 'Share Tech Mono', monospace;
+  background-color: var(--theme-bg);
+  color: var(--theme-primary);
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  transition: background-color 0.5s ease;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-terminal);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-primary);
+}
+
+/* Glitch effect keyframes */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px currentColor; }
+  50% { box-shadow: 0 0 20px currentColor, 0 0 40px currentColor; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-glitch {
+  animation: glitch 0.3s ease-in-out;
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+.scanline-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+.terminal-text-glow {
+  text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+}
+
+.terminal-border-glow {
+  box-shadow: 0 0 5px currentColor, inset 0 0 5px currentColor;
+}
+
+.crt-flicker {
+  animation: crt-flicker 0.15s infinite;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.98; }
+}
+
+.matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.15;
+}
