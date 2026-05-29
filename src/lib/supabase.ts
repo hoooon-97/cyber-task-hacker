@@ -12,7 +12,7 @@ export async function loadProfile(userId: string): Promise<DatabaseProfile | nul
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
   if (error) {
     console.error('loadProfile error:', error);
     return null;
