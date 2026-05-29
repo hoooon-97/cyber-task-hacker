@@ -173,7 +173,7 @@ export const useHackerStore = create<HackerState>()(
       },
 
       saveToSupabase: async (userId) => {
-        const { upsertProfile, insertMission, upsertActivityLog, upsertWeekRecord } = await import('../lib/supabase');
+        const { upsertProfile, upsertMission, upsertActivityLog, upsertWeekRecord } = await import('../lib/supabase');
         const state = get();
         await upsertProfile({
           id: userId,
@@ -188,7 +188,7 @@ export const useHackerStore = create<HackerState>()(
           focus_minutes_total: state.focusMinutesTotal,
         });
         for (const m of state.missions) {
-          await insertMission({
+          await upsertMission({
             id: m.id,
             user_id: userId,
             title: m.title,

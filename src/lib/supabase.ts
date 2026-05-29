@@ -22,7 +22,10 @@ export async function loadProfile(userId: string): Promise<DatabaseProfile | nul
 
 export async function upsertProfile(profile: Partial<DatabaseProfile> & { id: string }) {
   const { error } = await supabase.from('profiles').upsert(profile, { onConflict: 'id' });
-  if (error) console.error('upsertProfile error:', error);
+  if (error) {
+    console.error('upsertProfile error:', error);
+    throw error;
+  }
 }
 
 // Missions CRUD
@@ -39,9 +42,12 @@ export async function loadMissions(userId: string): Promise<DatabaseMission[]> {
   return data || [];
 }
 
-export async function insertMission(mission: DatabaseMission) {
-  const { error } = await supabase.from('missions').insert(mission);
-  if (error) console.error('insertMission error:', error);
+export async function upsertMission(mission: DatabaseMission) {
+  const { error } = await supabase.from('missions').upsert(mission, { onConflict: 'id' });
+  if (error) {
+    console.error('upsertMission error:', error);
+    throw error;
+  }
 }
 
 export async function updateMissionStatus(id: string, status: string, breachedAt?: string | null) {
@@ -81,7 +87,10 @@ export async function loadActivityLogs(userId: string): Promise<DatabaseActivity
 
 export async function upsertActivityLog(log: Omit<DatabaseActivityLog, 'id'>) {
   const { error } = await supabase.from('activity_logs').upsert(log, { onConflict: 'user_id,date' });
-  if (error) console.error('upsertActivityLog error:', error);
+  if (error) {
+    console.error('upsertActivityLog error:', error);
+    throw error;
+  }
 }
 
 // Week Records
@@ -99,7 +108,10 @@ export async function loadWeekRecords(userId: string): Promise<DatabaseWeekRecor
 
 export async function upsertWeekRecord(record: Omit<DatabaseWeekRecord, 'id'>) {
   const { error } = await supabase.from('week_records').upsert(record, { onConflict: 'user_id,week_key' });
-  if (error) console.error('upsertWeekRecord error:', error);
+  if (error) {
+    console.error('upsertWeekRecord error:', error);
+    throw error;
+  }
 }
 
 // Daily Missions
