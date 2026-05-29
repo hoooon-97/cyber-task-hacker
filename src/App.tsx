@@ -36,15 +36,41 @@ function App() {
     }
   }, [user, profile.handle, setHandle]);
 
-  // Load from Supabase ONLY if no local data (first-time login)
+  // Load from Supabase on login
   useEffect(() => {
     if (user?.id) {
       const state = useHackerStore.getState();
-      const hasLocalData = state.missions.length > 0 || state.profile.reputation > 0 || state.profile.handle !== 'GH0ST_01';
-      if (!hasLocalData) {
-        state.loadFromSupabase(user.id);
-      }
+      state.loadFromSupabase(user.id);
     }
+  }, [user?.id]);
+
+  // Auto-save to Supabase when data changes (debounced)
+  useEffect(() => {
+    if (!user?.id) return;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const unsubscribe = useHackerStore.subscribe((state, prevState) => {
+      const dataChanged =
+        state.missions !== prevState.missions ||
+        state.profile !== prevState.profile ||
+        state.activityLog !== prevState.activityLog ||
+        state.weekRecords !== prevState.weekRecords ||
+        state.currentStreak !== prevState.currentStreak ||
+        state.longestStreak !== prevState.longestStreak ||
+        state.focusMinutesTotal !== prevState.focusMinutesTotal;
+
+      if (dataChanged) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          state.saveToSupabase(user.id);
+        }, 2000);
+      }
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
   }, [user?.id]);
 
   // Apply theme
