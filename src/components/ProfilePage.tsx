@@ -200,9 +200,10 @@ export default function ProfilePage() {
                     await saveToSupabase(user.id);
                     setSyncStatus('sync_success');
                     setSyncMessage('> SYNC COMPLETE // DATA SECURED IN CLOUD');
-                  } catch {
+                  } catch (err: any) {
                     setSyncStatus('error');
-                    setSyncMessage('> SYNC FAILED // CONNECTION INTERRUPTED');
+                    setSyncMessage(`> SYNC FAILED // ${err.message || 'CONNECTION INTERRUPTED'}`);
+                    console.error('SYNC ERROR:', err);
                   }
                   setTimeout(() => { setSyncStatus('idle'); setSyncMessage(''); }, 3000);
                 }}
@@ -221,9 +222,10 @@ export default function ProfilePage() {
                     await loadFromSupabase(user.id);
                     setSyncStatus('load_success');
                     setSyncMessage('> LOAD COMPLETE // CLOUD DATA INTEGRATED');
-                  } catch {
+                  } catch (err: any) {
                     setSyncStatus('error');
-                    setSyncMessage('> LOAD FAILED // CONNECTION INTERRUPTED');
+                    setSyncMessage(`> LOAD FAILED // ${err.message || 'CONNECTION INTERRUPTED'}`);
+                    console.error('LOAD ERROR:', err);
                   }
                   setTimeout(() => { setSyncStatus('idle'); setSyncMessage(''); }, 3000);
                 }}
