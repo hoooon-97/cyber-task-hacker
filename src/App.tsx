@@ -61,8 +61,12 @@ function App() {
 
       if (dataChanged) {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          state.saveToSupabase(user.id); // incremental (auto-sync)
+        timeoutId = setTimeout(async () => {
+          try {
+            await state.saveToSupabase(user.id); // incremental auto-sync
+          } catch (e) {
+            console.error('Auto-sync failed:', e);
+          }
         }, 2000);
       }
     });
