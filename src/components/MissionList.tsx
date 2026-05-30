@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useHackerStore } from '../store/useHackerStore';
+import { useAuth } from '../hooks/useAuth';
 import type { MissionStatus } from '../types';
 import MissionItem from './MissionItem';
 import HackingModal from './HackingModal';
@@ -14,6 +15,10 @@ export default function MissionList() {
   const startMission = useHackerStore((s) => s.startMission);
   const deleteMission = useHackerStore((s) => s.deleteMission);
   const clearBreachedMissions = useHackerStore((s) => s.clearBreachedMissions);
+  const { user } = useAuth();
+
+  const handleDelete = (id: string) => deleteMission(id, user?.id);
+  const handleClearBreached = () => clearBreachedMissions(user?.id);
 
   const [filter, setFilter] = useState<FilterType>('ALL');
   const [activeMission, setActiveMission] = useState<string | null>(null);
@@ -91,7 +96,7 @@ export default function MissionList() {
           ))}
           {counts.BREACHED > 0 && (
             <button
-              onClick={clearBreachedMissions}
+              onClick={handleClearBreached}
               className="px-2.5 py-1 text-[10px] border border-alert/50 text-alert hover:bg-alert/10 transition-all flex items-center gap-1 ml-auto"
             >
               <Trash2 size={10} />
@@ -125,7 +130,7 @@ export default function MissionList() {
                 index={index}
                 onStart={handleStart}
                 onBreach={handleBreach}
-                onDelete={deleteMission}
+                onDelete={handleDelete}
                 onFocus={(id) => setFocusMission(id)}
               />
             ))

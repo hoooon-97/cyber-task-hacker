@@ -36,8 +36,8 @@ interface HackerState {
   loadFromSupabase: (userId: string) => Promise<void>;
   saveToSupabase: (userId: string) => Promise<void>;
   addMission: (title: string, difficulty: Difficulty, deadline?: number) => void;
-  deleteMission: (id: string) => void;
-  clearBreachedMissions: () => void;
+  deleteMission: (id: string, userId?: string) => void;
+  clearBreachedMissions: (userId?: string) => void;
   startMission: (id: string) => void;
   completeBreach: (id: string, isDaily?: boolean) => void;
   setActiveView: (view: AppView) => void;
@@ -137,26 +137,22 @@ export const useHackerStore = create<HackerState>()(
           }));
         }
         const dbMissions = await loadMissions(userId);
-        if (dbMissions.length > 0) {
-          set(() => ({
-            missions: dbMissions.map((m) => ({
-              id: m.id,
-              title: m.title,
-              difficulty: m.difficulty,
-              status: m.status,
-              createdAt: new Date(m.created_at).getTime(),
-              breachedAt: m.breached_at ? new Date(m.breached_at).getTime() : undefined,
-              serverName: m.server_name,
-              ipAddress: m.ip_address,
-            })),
-          }));
-        }
+        set(() => ({
+          missions: dbMissions.map((m) => ({
+            id: m.id,
+            title: m.title,
+            difficulty: m.difficulty,
+            status: m.status,
+            createdAt: new Date(m.created_at).getTime(),
+            breachedAt: m.breached_at ? new Date(m.breached_at).getTime() : undefined,
+            serverName: m.server_name,
+            ipAddress: m.ip_address,
+          })),
+        }));
         const dbLogs = await loadActivityLogs(userId);
         const logMap: Record<string, number> = {};
         dbLogs.forEach((l) => { logMap[l.date] = l.count; });
-        if (Object.keys(logMap).length > 0) {
-          set(() => ({ activityLog: logMap }));
-        }
+        set(() => ({ activityLog: logMap }));
         const dbWeeks = await loadWeekRecords(userId);
         const weekMap: Record<string, WeekRecord> = {};
         dbWeeks.forEach((w) => {
@@ -167,9 +163,7 @@ export const useHackerStore = create<HackerState>()(
             focusMinutes: w.focus_minutes,
           };
         });
-        if (Object.keys(weekMap).length > 0) {
-          set(() => ({ weekRecords: weekMap }));
-        }
+        set(() => ({ weekRecords: weekMap }));
       },
 
       saveToSupabase: async (userId) => {
@@ -228,15 +222,33 @@ export const useHackerStore = create<HackerState>()(
         set((state) => ({ missions: [mission, ...state.missions] }));
       },
 
-      deleteMission: (id) =>
+      deleteMission: async (id, userId) => {
         set((state) => ({
           missions: state.missions.filter((m) => m.id !== id),
-        })),
+        }));
+        if (userId) {
+          try {
+            const { deleteMissionDb } = await import('../lib/supabase');
+            await deleteMissionDb(id);
+          } catch (e) {
+            console.error('Failed to delete mission from cloud:', e);
+          }
+        }
+      },
 
-      clearBreachedMissions: () =>
+      clearBreachedMissions: async (userId) => {
         set((state) => ({
           missions: state.missions.filter((m) => m.status !== 'BREACHED'),
-        })),
+        }));
+        if (userId) {
+          try {
+            const { deleteBreachedMissionsDb } = await import('../lib/supabase');
+            await deleteBreachedMissionsDb(userId);
+          } catch (e) {
+            console.error('Failed to clear breached missions from cloud:', e);
+          }
+        }
+      },
 
       startMission: (id) =>
         set((state) => ({

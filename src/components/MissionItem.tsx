@@ -12,7 +12,7 @@ interface Props {
   index: number;
   onStart: (id: string) => void;
   onBreach: (id: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => void;  // receives userId internally via wrapper in MissionList
   onFocus: (id: string) => void;
 }
 
