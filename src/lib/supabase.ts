@@ -58,9 +58,16 @@ export async function updateMissionStatus(id: string, status: string, breachedAt
   if (error) console.error('updateMissionStatus error:', error);
 }
 
-export async function deleteMissionDb(id: string) {
-  const { error } = await supabase.from('missions').delete().eq('id', id);
-  if (error) console.error('deleteMissionDb error:', error);
+export async function deleteMissionDb(id: string, userId?: string) {
+  let query = supabase.from('missions').delete().eq('id', id);
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+  const { error } = await query;
+  if (error) {
+    console.error('deleteMissionDb error:', error);
+    throw error;
+  }
 }
 
 export async function deleteBreachedMissionsDb(userId: string) {
@@ -69,7 +76,10 @@ export async function deleteBreachedMissionsDb(userId: string) {
     .delete()
     .eq('user_id', userId)
     .eq('status', 'BREACHED');
-  if (error) console.error('deleteBreachedMissionsDb error:', error);
+  if (error) {
+    console.error('deleteBreachedMissionsDb error:', error);
+    throw error;
+  }
 }
 
 // Activity Log

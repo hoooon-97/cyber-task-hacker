@@ -229,7 +229,7 @@ export const useHackerStore = create<HackerState>()(
         if (userId) {
           try {
             const { deleteMissionDb } = await import('../lib/supabase');
-            await deleteMissionDb(id);
+            await deleteMissionDb(id, userId);
           } catch (e) {
             console.error('Failed to delete mission from cloud:', e);
           }
