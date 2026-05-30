@@ -63,22 +63,31 @@ export async function deleteMissionDb(id: string, userId?: string) {
   if (userId) {
     query = query.eq('user_id', userId);
   }
-  const { error } = await query;
+  const { data, error } = await query.select();
+  console.log('[deleteMissionDb] id=', id, 'userId=', userId, 'deletedRows=', data, 'error=', error);
   if (error) {
     console.error('deleteMissionDb error:', error);
     throw error;
   }
+  if (!data || data.length === 0) {
+    console.warn('[deleteMissionDb] No rows were deleted! The row may not exist for this user_id or RLS prevented deletion.');
+  }
 }
 
 export async function deleteBreachedMissionsDb(userId: string) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('missions')
     .delete()
     .eq('user_id', userId)
-    .eq('status', 'BREACHED');
+    .eq('status', 'BREACHED')
+    .select();
+  console.log('[deleteBreachedMissionsDb] userId=', userId, 'deletedRows=', data, 'error=', error);
   if (error) {
     console.error('deleteBreachedMissionsDb error:', error);
     throw error;
+  }
+  if (!data || data.length === 0) {
+    console.warn('[deleteBreachedMissionsDb] No rows were deleted! RLS or no matching breached missions for this user.');
   }
 }
 
