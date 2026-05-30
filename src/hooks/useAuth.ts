@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useHackerStore } from '../store/useHackerStore';
 import type { User, Session } from '@supabase/supabase-js';
 
 export function useAuth() {
@@ -42,6 +43,8 @@ export function useAuth() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Reset boot animation so it plays again on next login
+    useHackerStore.getState().resetHasBooted();
   };
 
   return { user, session, loading, signInWithGithub, signOut };

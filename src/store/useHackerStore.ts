@@ -42,6 +42,7 @@ interface HackerState {
   completeBreach: (id: string, isDaily?: boolean) => void;
   setActiveView: (view: AppView) => void;
   completeBoot: () => void;
+  resetHasBooted: () => void;
   generateDailyMissions: () => void;
   completeDailyMission: (index: number) => void;
   addFocusSession: (minutes: number) => void;
@@ -329,6 +330,7 @@ export const useHackerStore = create<HackerState>()(
       setActiveView: (view) => set(() => ({ activeView: view })),
 
       completeBoot: () => set(() => ({ hasBooted: true })),
+      resetHasBooted: () => set(() => ({ hasBooted: false })),
 
       generateDailyMissions: () => {
         const todayKey = getDateKey();
