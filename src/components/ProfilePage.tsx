@@ -197,7 +197,8 @@ export default function ProfilePage() {
                   setSyncStatus('syncing');
                   setSyncMessage('> UPLINK ESTABLISHED... TRANSMITTING DATA...');
                   try {
-                    await saveToSupabase(user.id);
+                    // Manual sync: force replace missions in cloud with current local state (fixes stuck duplicates)
+                    await saveToSupabase(user.id, { replaceMissions: true });
                     setSyncStatus('sync_success');
                     setSyncMessage('> SYNC COMPLETE // DATA SECURED IN CLOUD');
                   } catch (err: any) {

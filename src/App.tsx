@@ -62,7 +62,7 @@ function App() {
       if (dataChanged) {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
-          state.saveToSupabase(user.id);
+          state.saveToSupabase(user.id); // incremental (auto-sync)
         }, 2000);
       }
     });

@@ -34,7 +34,7 @@ interface HackerState {
   setSoundEnabled: (enabled: boolean) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   loadFromSupabase: (userId: string) => Promise<void>;
-  saveToSupabase: (userId: string) => Promise<void>;
+  saveToSupabase: (userId: string, options?: { replaceMissions?: boolean }) => Promise<void>;
   addMission: (title: string, difficulty: Difficulty, deadline?: number) => void;
   deleteMission: (id: string, userId?: string) => void;
   clearBreachedMissions: (userId?: string) => void;
@@ -166,9 +166,10 @@ export const useHackerStore = create<HackerState>()(
         set(() => ({ weekRecords: weekMap }));
       },
 
-      saveToSupabase: async (userId) => {
+      saveToSupabase: async (userId, options?: { replaceMissions?: boolean }) => {
         const { upsertProfile, upsertMission, upsertActivityLog, upsertWeekRecord } = await import('../lib/supabase');
         const state = get();
+
         await upsertProfile({
           id: userId,
           handle: state.profile.handle,
@@ -181,6 +182,13 @@ export const useHackerStore = create<HackerState>()(
           longest_streak: state.longestStreak,
           focus_minutes_total: state.focusMinutesTotal,
         });
+
+        if (options?.replaceMissions) {
+          // Nuclear option for manual sync: wipe all missions in cloud then re-insert current local state
+          const { supabase } = await import('../lib/supabase');
+          await supabase.from('missions').delete().eq('user_id', userId);
+        }
+
         for (const m of state.missions) {
           await upsertMission({
             id: m.id,
@@ -194,6 +202,7 @@ export const useHackerStore = create<HackerState>()(
             breached_at: m.breachedAt ? new Date(m.breachedAt).toISOString() : null,
           });
         }
+
         for (const [date, count] of Object.entries(state.activityLog)) {
           await upsertActivityLog({ user_id: userId, date, count });
         }
