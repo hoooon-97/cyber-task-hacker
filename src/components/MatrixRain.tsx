@@ -35,8 +35,8 @@ export default function MatrixRain() {
         const x = i * 14;
         const y = columns[i] * 14;
 
-        // Fade effect for top characters
-        const alpha = Math.max(0.1, 1 - (columns[i] * 14) / canvas.height);
+        // Only increased green character brightness for better visibility
+        const alpha = Math.max(0.65, 0.98 - (columns[i] * 6) / canvas.height);
         ctx.fillStyle = `rgba(0, 255, 65, ${alpha})`;
         ctx.fillText(char, x, y);
 
